@@ -54,8 +54,8 @@ function Review() {
     }
   };
 
+  // Save all responses to localStorage
   const submitSurvey = () => {
-    // Save all responses to localStorage
     Object.entries(responses).forEach(([question, value]) => {
       localStorage.setItem(question, value);
     });
@@ -82,6 +82,7 @@ function Review() {
           <div className="relative bg-white p-8 shadow-lg rounded-lg w-[600px] h-[400px]">
             <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg"></div>
             <div className="relative flex flex-col justify-center items-center h-full text-center">
+              <p className='absolute top-0 text-bold font-bold text-lg text-black'>Customer Survey</p>
               <p className="text-lg font-semibold text-gray-800 mb-6">
                 {index + 1}. {data[index].question}
               </p>
@@ -105,7 +106,7 @@ function Review() {
               ) : index === 4 ? (
                 <div className="mt-4">
                   <textarea
-                    className="w-full h-24 p-2 border border-gray-300 rounded-lg"
+                    className="w-full h-20 p-2 border border-gray-300 rounded-lg"
                     placeholder="Your answer"
                     value={textAnswer}
                     onChange={handleTextInput}
@@ -128,7 +129,7 @@ function Review() {
                   ))}
                 </div>
               )}
-              
+
               <button
                 onClick={skip}
                 className="mt-4 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition"

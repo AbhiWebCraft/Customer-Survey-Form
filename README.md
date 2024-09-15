@@ -31,4 +31,4 @@ Start the development server with the following command:
 
 
 # npm run dev
-Open your browser and visit http://localhost:3000 to see the application in action.
+Open your browser and visit http://localhost:5173 to see the application in action.
