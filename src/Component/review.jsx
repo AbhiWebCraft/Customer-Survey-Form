@@ -5,102 +5,87 @@ import Welcome from "../Component/Welcome.jsx";
 
 function Review() {
   const [surveyStarted, setSurveyStarted] = useState(false);
-  const [surveyCompleted, setSurveyCompleted] = useState(false); 
+  const [surveyCompleted, setSurveyCompleted] = useState(false);
   const [rating, setRating] = useState(0);
-  const [textAnswer, setTextAnswer] = useState(''); 
-  let [index, setIndex] = useState(0);
-  let [question, setQuestion] = useState(data[index]);
+  const [textAnswer, setTextAnswer] = useState('');
+  const [index, setIndex] = useState(0);
+  const [question, setQuestion] = useState(data[index]);
+  const [responses, setResponses] = useState({});
 
-  // saving rating or text input in localStorage
-  const saveToLocalStorage = (questionText, value) => {
-    localStorage.setItem(questionText, value); 
-  };
-
-  //getting saved rating/text input from localStorage
-  const getFromLocalStorage = (questionText) => {
-    return localStorage.getItem(questionText) || ""; 
-  };
-
-  
   useEffect(() => {
-    if (index === 4) {
-      setTextAnswer(getFromLocalStorage(data[index].question));
-    } else {
-      setRating(getFromLocalStorage(data[index].question));
-    }
+    setQuestion(data[index]);
   }, [index]);
 
   const handleRating = (value) => {
     setRating(value);
-    saveToLocalStorage(data[index].question, value);
+    setResponses(prev => ({
+      ...prev,
+      [data[index].question]: value
+    }));
   };
 
   const handleTextInput = (e) => {
     setTextAnswer(e.target.value);
-    saveToLocalStorage(data[index].question, e.target.value);
+    setResponses(prev => ({
+      ...prev,
+      [data[index].question]: e.target.value
+    }));
   };
 
   const next = () => {
     if (index < data.length - 1) {
-      setIndex(++index);
-      setRating(0); 
-      setTextAnswer(''); 
-    } else {
-      setSurveyCompleted(true); 
+      setIndex(prevIndex => prevIndex + 1);
+      setRating(0);
+      setTextAnswer('');
     }
   };
 
   const prev = () => {
     if (index > 0) {
-      setIndex(--index);
+      setIndex(prevIndex => prevIndex - 1);
     }
   };
 
   const skip = () => {
     if (index < data.length - 1) {
-      setIndex(++index);
-      setRating(0); 
-      setTextAnswer(''); 
+      setIndex(prevIndex => prevIndex + 1);
+      setRating(0);
+      setTextAnswer('');
     }
   };
 
-
-  const restartSurvey = () => {
-    localStorage.clear(); 
-    setSurveyStarted(false); 
-    setSurveyCompleted(false); 
-    setIndex(0); 
-    setRating(0); 
-    setTextAnswer(''); 
-    setQuestion(data[0]); 
+  const submitSurvey = () => {
+    // Save all responses to localStorage
+    Object.entries(responses).forEach(([question, value]) => {
+      localStorage.setItem(question, value);
+    });
+    setSurveyCompleted(true);
   };
 
-  // getting all the questions and their answers from localStorage
-  const surveyData = data.map((item) => ({
-    question: item.question,
-    answer: localStorage.getItem(item.question) || "Skipped",
-  }));
-
-  window.addEventListener('load',()=>{
-    localStorage.clear();
+  const restartSurvey = () => {
+    setSurveyStarted(false);
+    setSurveyCompleted(false);
+    setIndex(0);
     setRating(0);
-  })
+    setTextAnswer('');
+    setResponses({});
+  };
 
   return (
     <>
       {!surveyStarted ? (
         <Welcome startSurvey={() => setSurveyStarted(true)} />
       ) : surveyCompleted ? (
-        <Completion surveyData={surveyData} restartSurvey={restartSurvey} />
+        <Completion surveyData={responses} restartSurvey={restartSurvey} />
       ) : (
         <div className="flex justify-center items-center h-screen">
           <div className="relative bg-white p-8 shadow-lg rounded-lg w-[600px] h-[400px]">
             <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg"></div>
             <div className="relative flex flex-col justify-center items-center h-full text-center">
-            <p className="absolute top-1 font-bold text-black"> Customer Survey</p>
               <p className="text-lg font-semibold text-gray-800 mb-6">
                 {index + 1}. {data[index].question}
               </p>
+
               {index === 3 ? (
                 <div className="flex justify-center space-x-4 mt-4">
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((number) => (
@@ -133,7 +118,7 @@ function Review() {
                       className={`w-10 h-10 flex items-center justify-center border border-gray-400 rounded-lg cursor-pointer transition-colors duration-300 ${
                         rating >= number
                           ? "bg-blue-500 text-white"
-                          : "hover:bg-blue-600 "
+                          : "hover:bg-blue-500 hover:text-white"
                       }`}
                       key={number}
                       onClick={() => handleRating(number)}
@@ -143,6 +128,10 @@ function Review() {
                   ))}
                 </div>
               )}
+
+              <p className="mt-4 text-lg text-gray-700">
+                Your {index === 4 ? "Answer" : "Rating"}: {index === 4 ? textAnswer : rating}
+              </p>
 
               <button
                 onClick={skip}
@@ -154,20 +143,29 @@ function Review() {
 
             <button
               onClick={prev}
-              disabled={index === 0} 
-              className="absolute bottom-4 left-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+              disabled={index === 0}
+              className="absolute bottom-4 left-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
             >
               &larr; Prev
             </button>
 
-            <button
-              onClick={next}
-              className="absolute bottom-4 right-4 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
-            >
-              Next &rarr;
-            </button>
+            {index === data.length - 1 ? (
+              <button
+                onClick={submitSurvey}
+                className="absolute bottom-4 right-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+              >
+                Submit Survey
+              </button>
+            ) : (
+              <button
+                onClick={next}
+                className="absolute bottom-4 right-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              >
+                Next &rarr;
+              </button>
+            )}
 
-            <p className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-lg text-black">
+            <p className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-lg text-gray-600">
               {index + 1} of {data.length}
             </p>
           </div>
