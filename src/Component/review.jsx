@@ -128,11 +128,7 @@ function Review() {
                   ))}
                 </div>
               )}
-
-              <p className="mt-4 text-lg text-gray-700">
-                Your {index === 4 ? "Answer" : "Rating"}: {index === 4 ? textAnswer : rating}
-              </p>
-
+              
               <button
                 onClick={skip}
                 className="mt-4 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition"
